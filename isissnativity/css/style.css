@@ -1,0 +1,84 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #121214;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#overlay-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 3rem;
+  z-index: 10;
+}
+
+.card {
+  background: rgba(20, 20, 28, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 1.8rem 2.2rem;
+  border-radius: 20px;
+  text-align: center;
+  color: #f0f0f5;
+  pointer-events: auto;
+  max-width: 400px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+}
+
+.card h1 {
+  font-size: 1.35rem;
+  margin-bottom: 0.6rem;
+  color: #fbbf24;
+}
+
+.card p {
+  font-size: 0.9rem;
+  color: #a0a0b0;
+  margin-bottom: 1.4rem;
+  line-height: 1.4;
+}
+
+button#ar-button {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  color: #ffffff;
+  padding: 0.9rem 2rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+}
+
+button#ar-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.6);
+}
+
+button#ar-button:disabled {
+  background: #3a3a45;
+  color: #707080;
+  box-shadow: none;
+  cursor: not-allowed;
+}
