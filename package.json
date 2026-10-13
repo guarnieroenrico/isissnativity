@@ -1,0 +1,24 @@
+{
+  "name": "presepe-ar",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "models": "npm run models:donkey && npm run models:holy",
+    "models:donkey": "gltf-transform metalrough models-src/donkey.glb models-src/_tmp-donkey-1.glb && gltf-transform webp models-src/_tmp-donkey-1.glb models-src/_tmp-donkey-2.glb && gltf-transform meshopt models-src/_tmp-donkey-2.glb public/models/donkey.glb --level medium",
+    "models:holy": "gltf-transform join models-src/holy-family.glb models-src/_tmp-holy-1.glb && gltf-transform weld models-src/_tmp-holy-1.glb models-src/_tmp-holy-2.glb && gltf-transform simplify models-src/_tmp-holy-2.glb models-src/_tmp-holy-3.glb --ratio 0.07 --error 0.02 && gltf-transform meshopt models-src/_tmp-holy-3.glb public/models/holy-family.glb --level high",
+    "models:inspect": "gltf-transform inspect public/models/donkey.glb && gltf-transform inspect public/models/holy-family.glb"
+  },
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.0.0",
+    "sharp": "^0.33.5",
+    "vite": "^5.4.0"
+  }
+}
