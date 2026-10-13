@@ -7,6 +7,17 @@ import { createDebugHud } from './debug.js';
 const DEBUG = new URLSearchParams(location.search).has('debug');
 const PLACE_DISTANCE = 1.3; // metri: centro del presepe davanti all'utente all'avvio AR
 
+// Il "pavimento" del Quest può differire dal pavimento vero: l'altezza si regola con la
+// levetta di un controller (su = alza, giù = abbassa) e viene ricordata tra le sessioni.
+const HEIGHT_KEY = 'presepe-height';
+let heightOffset = 0;
+try { heightOffset = Number(localStorage.getItem(HEIGHT_KEY)) || 0; } catch {}
+let heightDirty = false;
+function saveHeight() {
+  heightDirty = false;
+  try { localStorage.setItem(HEIGHT_KEY, String(heightOffset)); } catch {}
+}
+
 const $ = (id) => document.getElementById(id);
 const statusEl = $('status'), hintEl = $('hint'), enterBtn = $('enter-ar');
 
@@ -54,15 +65,34 @@ function placeInFrontOfUser(frame) {
   dir.normalize();
 
   const stage = stageApi.stage;
-  stage.position.set(p.x + dir.x * PLACE_DISTANCE, 0, p.z + dir.z * PLACE_DISTANCE);
+  stage.position.set(p.x + dir.x * PLACE_DISTANCE, heightOffset, p.z + dir.z * PLACE_DISTANCE);
   stage.rotation.set(0, Math.atan2(-dir.x, -dir.z), 0);
   placed = true;
+}
+
+/** Levetta (asse 3 dei controller Quest): spinta in avanti = presepe più in alto. */
+function adjustHeight(dt) {
+  const session = renderer.xr.getSession();
+  if (!session) return;
+  let y = 0;
+  for (const src of session.inputSources) {
+    const v = src.gamepad?.axes?.[3] ?? 0;
+    if (Math.abs(v) > Math.abs(y)) y = v;
+  }
+  if (Math.abs(y) > 0.2) {
+    heightOffset = THREE.MathUtils.clamp(heightOffset - y * dt * 0.25, -1.5, 1.5);
+    heightDirty = true;
+  } else if (heightDirty) {
+    saveHeight();
+  }
+  stageApi.stage.position.y = heightOffset;
 }
 
 renderer.setAnimationLoop((_time, frame) => {
   const dt = Math.min(clock.getDelta(), 0.1);
   const inXr = renderer.xr.isPresenting;
   if (inXr && !placed && frame && stageApi) placeInFrontOfUser(frame);
+  if (inXr && placed && stageApi) adjustHeight(dt);
   if (!inXr) controls.update();
   stageApi?.update(dt, clock.elapsedTime);
   renderer.render(scene, camera);
@@ -80,6 +110,7 @@ renderer.xr.addEventListener('sessionend', () => {
   document.body.classList.remove('in-xr');
   controls.enabled = true;
   placed = false;
+  if (heightDirty) saveHeight();
   stageApi?.stage.position.set(0, 0, 0);
   stageApi?.stage.rotation.set(0, 0, 0);
   enterBtn.disabled = false;
